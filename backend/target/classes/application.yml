@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: saas-platform
+
+  # --- H2 In-Memory Database (temporary, replace with MySQL later) ---
+  datasource:
+    url: jdbc:h2:mem:saas_platform;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      mode: never
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # --- Disable MongoDB for now (enable when you add real MongoDB) ---
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: saas_analytics
+
+jwt:
+  secret: dev-secret-key-for-local-development-only-change-in-production-min-32-chars!!
+  expiration: 900000
+  refresh-expiration: 604800000
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+cors:
+  allowed-origins: http://localhost:3000
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: "*"
+
+logging:
+  level:
+    com.saas.platform: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG

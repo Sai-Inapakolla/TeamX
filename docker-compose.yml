@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: _
+      MYSQL_DATABASE: _
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: _
+      SPRING_DATASOURCE_USERNAME: _
+      SPRING_DATASOURCE_PASSWORD: _
+      SPRING_DATA_MONGODB_URI: _
+      JWT_SECRET: _
+    depends_on:
+      - mysql
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_BASE_URL: http://localhost:8080/api/v1
+    depends_on:
+      - backend
+
+  ml-service:
+    build: ./ml-service
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+      - mongodb
+
+volumes:
+  mysql_data:
+  mongo_data:

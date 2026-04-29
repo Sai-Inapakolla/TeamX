@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:saas_platform_dev
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+  flyway:
+    enabled: true
+
+jwt:
+  secret: dev-only-secret-change-before-prod
+  expiration: 900000
+  refresh-expiration: 604800000
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1

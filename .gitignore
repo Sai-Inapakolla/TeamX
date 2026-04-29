@@ -1,0 +1,69 @@
+# .gitignore
+
+# IDE & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.iml
+.DS_Store
+Thumbs.db
+
+# Build Artifacts
+target/
+build/
+dist/
+.gradle/
+*.class
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+error_log.txt
+startup_error.txt
+
+# Maven
+.m2/
+
+# Docker
+docker-compose.override.yml
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+*.swp
+*~
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+coverage.xml
+
+# Misc
+*.jar.original
+direct-deps.txt
+effective-pom

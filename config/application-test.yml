@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:saas_platform_test;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+
+jwt:
+  secret: test-secret-key
+  expiration: 900000
+  refresh-expiration: 604800000
