@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService, LoginRequest, LoginResponse } from '../services/authService';
+import { normalizePermission } from '../utils/permissions';
 
 interface AuthContextType {
     user: LoginResponse['user'] | null;
@@ -14,44 +15,52 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<LoginResponse['user'] | null>(null);
-    const [tenants, setTenants] = useState<LoginResponse['tenants']>([]);
-    const [activeTenant, setActiveTenant] = useState<LoginResponse['activeTenant'] | null>(null);
-    const [permissions, setPermissions] = useState<string[]>([]);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-    const parsePermissionsFromToken = (token: string): string[] => {
-        try {
-            const payload = token.split('.')[1];
-            if (!payload) {
-                return [];
-            }
-
-            const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-            const padLength = (4 - (normalized.length % 4)) % 4;
-            const padded = normalized + '='.repeat(padLength);
-            const decoded = JSON.parse(atob(padded));
-            return Array.isArray(decoded.permissions)
-                ? decoded.permissions.filter((p: unknown) => typeof p === 'string')
-                : [];
-        } catch {
+const parsePermissionsFromToken = (token: string): string[] => {
+    try {
+        const payload = token.split('.')[1];
+        if (!payload) {
             return [];
         }
+
+        const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const padLength = (4 - (normalized.length % 4)) % 4;
+        const padded = normalized + '='.repeat(padLength);
+        const decoded = JSON.parse(atob(padded));
+        return Array.isArray(decoded.permissions)
+            ? decoded.permissions.filter((permission: unknown) => typeof permission === 'string')
+            : [];
+    } catch {
+        return [];
+    }
+};
+
+const readStoredAuthState = () => {
+    const token = localStorage.getItem('accessToken');
+    const savedUser = localStorage.getItem('user');
+    const savedActiveTenant = localStorage.getItem('activeTenant');
+
+    return {
+        user: savedUser ? JSON.parse(savedUser) : null,
+        activeTenant: savedActiveTenant ? JSON.parse(savedActiveTenant) : null,
+        permissions: token ? parsePermissionsFromToken(token) : [],
+        isAuthenticated: Boolean(token && savedUser),
     };
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const storedAuthState = readStoredAuthState();
+    const [user, setUser] = useState<LoginResponse['user'] | null>(storedAuthState.user);
+    const [tenants, setTenants] = useState<LoginResponse['tenants']>([]);
+    const [activeTenant, setActiveTenant] = useState<LoginResponse['activeTenant'] | null>(storedAuthState.activeTenant);
+    const [permissions, setPermissions] = useState<string[]>(storedAuthState.permissions);
+    const [isAuthenticated, setIsAuthenticated] = useState(storedAuthState.isAuthenticated);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        const savedUser = localStorage.getItem('user');
-        const savedActiveTenant = localStorage.getItem('activeTenant');
-        if (token && savedUser) {
-            setUser(JSON.parse(savedUser));
-            if (savedActiveTenant) {
-                setActiveTenant(JSON.parse(savedActiveTenant));
-            }
-            setPermissions(parsePermissionsFromToken(token));
-            setIsAuthenticated(true);
-        }
+        const { user: storedUser, activeTenant: storedTenant, permissions: storedPermissions, isAuthenticated: storedIsAuthenticated } = readStoredAuthState();
+        setUser(storedUser);
+        setActiveTenant(storedTenant);
+        setPermissions(storedPermissions);
+        setIsAuthenticated(storedIsAuthenticated);
     }, []);
 
     const login = async (credentials: LoginRequest) => {
@@ -92,7 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(false);
     };
 
-    const hasPermission = (permission: string): boolean => permissions.includes(permission);
+    const hasPermission = (permission: string): boolean => permissions.includes(normalizePermission(permission));
 
     return (
         <AuthContext.Provider value={{ user, tenants, activeTenant, permissions, login, logout, hasPermission, isAuthenticated }}>

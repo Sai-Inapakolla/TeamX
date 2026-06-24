@@ -125,6 +125,9 @@ const Login: React.FC = () => {
                         <button type="submit" className="btn-primary">
                             Continue
                         </button>
+                        <div style={{ marginTop: 8 }}>
+                            <a href="/register">Create an account</a>
+                        </div>
                     </form>
                 ) : (
                     <form onSubmit={handleCompanySubmit}>

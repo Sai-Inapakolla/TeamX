@@ -104,6 +104,76 @@ public class AuthService {
                 .build();
     }
 
+    public LoginResponse register(com.saas.platform.dto.RegisterRequest request) {
+        // Basic validation
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists");
+        }
+
+        // Create tenant
+        Tenant tenant = Tenant.builder()
+                .name(request.getOrgName())
+                .status(Tenant.TenantStatus.ACTIVE)
+                .build();
+        tenant = tenantRepository.save(tenant);
+
+        // Create user
+        String localPart = request.getEmail() != null && request.getEmail().contains("@")
+                ? request.getEmail().split("@")[0]
+                : request.getEmail();
+
+        User user = User.builder()
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .firstName(request.getFirstName() != null ? request.getFirstName() : localPart)
+                .lastName(request.getLastName() != null ? request.getLastName() : "")
+                .status(User.UserStatus.ACTIVE)
+                .build();
+        user = userRepository.save(user);
+
+        // Link user to tenant as ORG_ADMIN
+        UserTenant userTenant = UserTenant.builder()
+                .userId(user.getId())
+                .tenantId(tenant.getId())
+                .role(UserTenant.Role.ORG_ADMIN)
+                .status(UserTenant.Status.ACTIVE)
+                .build();
+        userTenantRepository.save(userTenant);
+
+        // Prepare response tokens
+        List<String> permissions = rolePermissionRepository.findPermissionsByRole(userTenant.getRole());
+        if (permissions.isEmpty()) {
+            permissions = com.saas.platform.security.RolePermissionMapper.permissionsFor(userTenant.getRole());
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(
+                user.getId(),
+                user.getEmail(),
+                userTenant.getTenantId(),
+                tenant.getName(),
+                userTenant.getRole().name(),
+                permissions
+        );
+
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
+
+        LoginResponse.TenantInfo tenantInfo = toTenantInfo(userTenant, tenant);
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .user(LoginResponse.UserInfo.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .build())
+                .tenants(List.of(tenantInfo))
+                .requiresTenantSelection(false)
+                .activeTenant(tenantInfo)
+                .build();
+    }
+
     public TenantSwitchResponse switchTenant(TenantSwitchRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         User user = userRepository.findById(userId)

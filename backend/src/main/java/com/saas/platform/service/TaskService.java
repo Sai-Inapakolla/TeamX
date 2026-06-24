@@ -43,12 +43,37 @@ public class TaskService {
                 .assignedTo(dto.getAssignedTo())
                 .status(Task.TaskStatus.valueOf(dto.getStatus() != null ? dto.getStatus() : "TODO"))
                 .priority(Task.Priority.valueOf(dto.getPriority() != null ? dto.getPriority() : "MEDIUM"))
-                .dueDate(dto.getDueDate() != null ? LocalDate.parse(dto.getDueDate()) : null)
+                .dueDate(parseDueDate(dto.getDueDate()))
             .createdBy(currentUserId)
                 .build();
 
         task = Objects.requireNonNull(taskRepository.save(task));
         return toDTO(task);
+    }
+
+    @Transactional
+    @PreAuthorize("hasAuthority('TASK_WRITE')")
+    public TaskDTO updateTask(Long projectId, Long taskId, TaskDTO dto) {
+        Long tenantId = TenantContext.getCurrentTenantId();
+        Task task = taskRepository.findByIdAndTenantIdAndProjectId(taskId, tenantId, projectId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        if (dto.getTitle() != null) task.setTitle(dto.getTitle());
+        if (dto.getDescription() != null) task.setDescription(dto.getDescription());
+        if (dto.getStatus() != null) task.setStatus(Task.TaskStatus.valueOf(dto.getStatus()));
+        if (dto.getPriority() != null) task.setPriority(Task.Priority.valueOf(dto.getPriority()));
+        if (dto.getAssignedTo() != null) task.setAssignedTo(dto.getAssignedTo());
+        if (dto.getDueDate() != null) task.setDueDate(parseDueDate(dto.getDueDate()));
+
+        task = taskRepository.save(task);
+        return toDTO(task);
+    }
+
+    private LocalDate parseDueDate(String dueDate) {
+        if (dueDate == null || dueDate.isBlank()) {
+            return null;
+        }
+        return LocalDate.parse(dueDate);
     }
 
     private TaskDTO toDTO(Task task) {

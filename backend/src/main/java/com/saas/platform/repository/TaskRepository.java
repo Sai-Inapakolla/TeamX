@@ -16,5 +16,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Optional<Task> findByIdAndTenantId(Long id, Long tenantId);
 
+    Optional<Task> findByIdAndTenantIdAndProjectId(Long id, Long tenantId, Long projectId);
+
     List<Task> findByTenantIdAndAssignedTo(Long tenantId, Long assignedTo);
 }

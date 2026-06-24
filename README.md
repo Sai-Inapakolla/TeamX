@@ -1,6 +1,23 @@
-# Multi-Tenant B2B SaaS Platform
+# TeamX - Multi-Tenant Project Management SaaS
 
-Enterprise-grade multi-tenant SaaS platform with React frontend, Spring Boot backend, and Python ML service.
+TeamX is a multi-tenant project management SaaS for organizations that need secure project tracking, Kanban task management, role-based access, and clean tenant isolation.
+
+## Features
+
+- Multi-tenancy with tenant-scoped projects, tasks, and users
+- JWT authentication with tenant-aware login
+- RBAC with 3 roles and 13 permissions
+- Kanban board for task workflow
+- User management with invite, role update, and remove actions
+- Organization settings for tenant details and members
+- Activity logs for project, task, and user events
+- Basic notifications for assignments and recent updates
+- Project search, task status filters, and assignee filters
+- Loading, error, and empty states across core pages
+
+## Screenshots
+
+Add screenshots from the running app in this section before sharing the project publicly.
 
 ## Architecture
 

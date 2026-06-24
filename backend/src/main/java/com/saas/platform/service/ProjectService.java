@@ -40,19 +40,19 @@ public class ProjectService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
     @PreAuthorize("hasAuthority('PROJECT_WRITE')")
     public ProjectDTO createProject(ProjectDTO dto) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
+        
         Project project = Project.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .ownerId(dto.getOwnerId())
+                .ownerId(currentUserId)
                 .status(Project.ProjectStatus.valueOf(dto.getStatus() != null ? dto.getStatus() : "ACTIVE"))
-            .createdBy(currentUserId)
+                .createdBy(currentUserId)
                 .build();
 
-        project = Objects.requireNonNull(projectRepository.save(project));
+        project = projectRepository.save(project);
         return toDTO(project);
     }
 

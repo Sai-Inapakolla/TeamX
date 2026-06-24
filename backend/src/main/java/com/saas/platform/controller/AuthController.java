@@ -4,6 +4,7 @@ import com.saas.platform.dto.LoginRequest;
 import com.saas.platform.dto.LoginResponse;
 import com.saas.platform.dto.TenantSwitchRequest;
 import com.saas.platform.dto.TenantSwitchResponse;
+import com.saas.platform.dto.RegisterRequest;
 import com.saas.platform.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
+        LoginResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
 

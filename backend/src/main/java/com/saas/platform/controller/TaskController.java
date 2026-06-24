@@ -28,4 +28,10 @@ public class TaskController {
         dto.setProjectId(projectId);
         return ResponseEntity.ok(taskService.createTask(dto));
     }
+
+    @PutMapping("/{taskId}")
+    @PreAuthorize("hasAuthority('TASK_WRITE')")
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody TaskDTO dto) {
+        return ResponseEntity.ok(taskService.updateTask(projectId, taskId, dto));
+    }
 }
