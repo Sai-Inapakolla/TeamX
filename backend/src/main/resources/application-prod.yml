@@ -7,13 +7,13 @@ spring:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/saas_platform}
     username: ${SPRING_DATASOURCE_USERNAME:saas_user}
     password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
 
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.MySQLDialect}
 
   flyway:
     enabled: true
