@@ -29,6 +29,12 @@ export interface LoginResponse {
     permissions?: string[];
 }
 
+export interface AcceptInvitePayload {
+    token: string;
+    name?: string;
+    password?: string;
+}
+
 export const authService = {
     login: async (data: LoginRequest): Promise<LoginResponse> => {
         const response = await api.post<LoginResponse>('/auth/login', data);
@@ -36,6 +42,10 @@ export const authService = {
     },
     register: async (data: { orgName: string; email: string; password: string; firstName?: string; lastName?: string }) : Promise<LoginResponse> => {
         const response = await api.post<LoginResponse>('/auth/register', data);
+        return response.data;
+    },
+    acceptInvite: async (data: AcceptInvitePayload): Promise<LoginResponse> => {
+        const response = await api.post<LoginResponse>('/auth/accept-invite', data);
         return response.data;
     },
 };

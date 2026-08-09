@@ -16,5 +16,5 @@ public class UserManagementDTO {
     private String role;
     private String status;
     private String joinedAt;
-    private String temporaryPassword;
+    private String inviteUrl;
 }

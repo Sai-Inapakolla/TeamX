@@ -2,12 +2,12 @@ spring:
   application:
     name: saas-platform
 
-  # --- H2 In-Memory Database (temporary, replace with MySQL later) ---
+  # --- Database Connection (SQL Server or H2) ---
   datasource:
-    url: jdbc:h2:mem:saas_platform;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/saas_platform;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;MODE=MySQL}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -27,33 +27,28 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.H2Dialect}
 
   sql:
     init:
       mode: never
 
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # --- Disable MongoDB for now (enable when you add real MongoDB) ---
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
-
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017
-      database: saas_analytics
+cloudinary:
+  url: ${CLOUDINARY_URL:}
 
 jwt:
   secret: dev-secret-key-for-local-development-only-change-in-production-min-32-chars!!
-  expiration: 900000
+  expiration: 86400000
   refresh-expiration: 604800000
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:inapakolla.sai1@gmail.com}
 
 server:
   port: 8080
@@ -61,12 +56,12 @@ server:
     context-path: /api/v1
 
 cors:
-  allowed-origins: http://localhost:3000,http://localhost:3001,http://localhost:5173
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001,http://localhost:5173}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
 
 logging:
   level:
-    com.saas.platform: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    com.saas.platform: ${LOGGING_LEVEL_APP:DEBUG}
+    org.springframework.security: ${LOGGING_LEVEL_SECURITY:INFO}
+    org.hibernate.SQL: ${LOGGING_LEVEL_SQL:INFO}

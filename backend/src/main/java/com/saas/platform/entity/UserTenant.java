@@ -47,6 +47,6 @@ public class UserTenant {
     }
 
     public enum Role {
-        ORG_ADMIN, MANAGER, USER
+        OWNER, ORG_ADMIN, MANAGER, USER
     }
 }

@@ -9,7 +9,7 @@ interface Props {
 
 const KanbanBoard: React.FC<Props> = ({ tasks, onTaskClick }) => {
     return (
-        <div style={{ display: 'flex', gap: 16, padding: 12, overflowX: 'auto', minHeight: 400 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, width: '100%' }}>
             <TaskColumn status="TODO" tasks={tasks} onTaskClick={onTaskClick} />
             <TaskColumn status="IN_PROGRESS" tasks={tasks} onTaskClick={onTaskClick} />
             <TaskColumn status="IN_REVIEW" tasks={tasks} onTaskClick={onTaskClick} />

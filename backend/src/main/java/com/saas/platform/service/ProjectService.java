@@ -11,8 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
+
 import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class ProjectService {
     public ProjectDTO getProjectById(Long id) {
         Long tenantId = TenantContext.getCurrentTenantId();
         Project project = projectRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         return toDTO(project);
     }
 
@@ -43,17 +46,30 @@ public class ProjectService {
     @PreAuthorize("hasAuthority('PROJECT_WRITE')")
     public ProjectDTO createProject(ProjectDTO dto) {
         Long currentUserId = SecurityUtils.getCurrentUserId();
-        
+        Long tenantId = TenantContext.getCurrentTenantId();
+
         Project project = Project.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .ownerId(currentUserId)
-                .status(Project.ProjectStatus.valueOf(dto.getStatus() != null ? dto.getStatus() : "ACTIVE"))
+                .status(parseStatus(dto.getStatus()))
                 .createdBy(currentUserId)
                 .build();
+        project.setTenantId(tenantId);
 
         project = projectRepository.save(project);
         return toDTO(project);
+    }
+
+    private Project.ProjectStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return Project.ProjectStatus.ACTIVE;
+        }
+        try {
+            return Project.ProjectStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid project status: " + status);
+        }
     }
 
     private ProjectDTO toDTO(Project project) {

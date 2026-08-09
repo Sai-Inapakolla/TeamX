@@ -5,6 +5,7 @@ export interface Task {
     projectId: number;
     title: string;
     description?: string;
+    department?: string;
     assignedTo?: number;
     status: string;
     priority: string;

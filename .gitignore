@@ -32,10 +32,28 @@ __pycache__/
 dist/
 build/
 
-# Environment
+# Environment & Secrets
 .env
-.env.local
-.env.*.local
+.env.*
+*.env
+sendgrid.env
+backend/sendgrid.env
+backend/.env
+
+# Data & Databases
+backend/data/
+data/
+*.db
+
+# Next.js & Build Artifacts
+.next/
+frontend/.next/
+*.tsbuildinfo
+build/
+dist/
+target/
+.gradle/
+*.class
 
 # Logs
 logs/
@@ -43,27 +61,30 @@ logs/
 error_log.txt
 startup_error.txt
 
-# Maven
-.m2/
-
-# Docker
-docker-compose.override.yml
-
-# OS
-.DS_Store
-.AppleDouble
-.LSOverride
-Thumbs.db
+# IDE & Editors
+.idea/
+.vscode/
+.classpath
+.project
+.settings/
 *.swp
-*~
+*.swo
+*.iml
+.DS_Store
+Thumbs.db
 
-# Tests
-.coverage
-htmlcov/
-.pytest_cache/
-coverage.xml
+# Python
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
 
-# Misc
+# Maven & Docker
+.m2/
+docker-compose.override.yml
 *.jar.original
 direct-deps.txt
 effective-pom
+

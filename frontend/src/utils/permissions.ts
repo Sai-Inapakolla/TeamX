@@ -1,7 +1,8 @@
 export const ROLES = {
     ADMIN: 'ADMIN',
     MANAGER: 'MANAGER',
-    USER: 'USER',
+    EMPLOYEE: 'EMPLOYEE',
+    USER: 'EMPLOYEE',
 } as const;
 
 export const PERMISSIONS = {
@@ -45,9 +46,11 @@ export const ROLE_PERMISSIONS = {
         PERMISSIONS.DELETE_TASK,
         PERMISSIONS.ASSIGN_TASK,
     ],
+    EMPLOYEE: [
+        PERMISSIONS.VIEW_PROJECTS,
+    ],
     USER: [
         PERMISSIONS.VIEW_PROJECTS,
-        PERMISSIONS.CREATE_TASK,
     ],
 } as const;
 
@@ -71,7 +74,8 @@ export const ROLE_LABELS: Record<string, string> = {
     ORG_ADMIN: 'ADMIN',
     ADMIN: 'ADMIN',
     MANAGER: 'MANAGER',
-    USER: 'USER',
+    USER: 'EMPLOYEE',
+    EMPLOYEE: 'EMPLOYEE',
 };
 
 export const normalizePermission = (permission: string) => PERMISSION_TO_AUTHORITY[permission] ?? permission;
@@ -88,6 +92,9 @@ export const toBackendRole = (role: string) => {
     const normalized = normalizeRole(role);
     if (normalized === ROLES.ADMIN) {
         return 'ORG_ADMIN';
+    }
+    if (normalized === 'EMPLOYEE') {
+        return 'USER';
     }
     return normalized;
 };

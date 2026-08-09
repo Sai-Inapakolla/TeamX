@@ -9,6 +9,7 @@ interface AuthContextType {
     permissions: string[];
     login: (credentials: LoginRequest) => Promise<LoginResponse>;
     logout: () => void;
+    setSession: (response: LoginResponse) => void;
     hasPermission: (permission: string) => boolean;
     isAuthenticated: boolean;
 }
@@ -63,6 +64,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(storedIsAuthenticated);
     }, []);
 
+    const setSession = (response: LoginResponse) => {
+        if (response.accessToken && response.refreshToken && response.activeTenant) {
+            localStorage.setItem('accessToken', response.accessToken);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            localStorage.setItem('user', JSON.stringify(response.user));
+            localStorage.setItem('activeTenant', JSON.stringify(response.activeTenant));
+            setUser(response.user);
+            setActiveTenant(response.activeTenant);
+            setPermissions(parsePermissionsFromToken(response.accessToken));
+            setIsAuthenticated(true);
+        }
+    };
+
     const login = async (credentials: LoginRequest) => {
         const response = await authService.login(credentials);
 
@@ -70,13 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.user);
 
         if (response.accessToken && response.refreshToken && response.activeTenant) {
-            localStorage.setItem('accessToken', response.accessToken);
-            localStorage.setItem('refreshToken', response.refreshToken);
-            localStorage.setItem('user', JSON.stringify(response.user));
-            localStorage.setItem('activeTenant', JSON.stringify(response.activeTenant));
-            setActiveTenant(response.activeTenant);
-            setPermissions(parsePermissionsFromToken(response.accessToken));
-            setIsAuthenticated(true);
+            setSession(response);
         } else {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
@@ -104,7 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hasPermission = (permission: string): boolean => permissions.includes(normalizePermission(permission));
 
     return (
-        <AuthContext.Provider value={{ user, tenants, activeTenant, permissions, login, logout, hasPermission, isAuthenticated }}>
+        <AuthContext.Provider value={{ user, tenants, activeTenant, permissions, login, logout, setSession, hasPermission, isAuthenticated }}>
             {children}
         </AuthContext.Provider>
     );

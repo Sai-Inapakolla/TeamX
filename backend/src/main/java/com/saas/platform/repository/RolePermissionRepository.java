@@ -14,9 +14,13 @@ public class RolePermissionRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public List<String> findPermissionsByRole(UserTenant.Role role) {
-        return jdbcTemplate.queryForList(
-                "SELECT permission_name FROM role_permissions WHERE role_name = ? ORDER BY permission_name",
-                String.class,
-                role.name());
+        try {
+            return jdbcTemplate.queryForList(
+                    "SELECT permission_name FROM role_permissions WHERE role_name = ? ORDER BY permission_name",
+                    String.class,
+                    role.name());
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 }

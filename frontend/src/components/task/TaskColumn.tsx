@@ -15,24 +15,35 @@ const taskStatusLabels: { [key: string]: string } = {
     'DONE': 'Done',
 };
 
-const taskStatusColors: { [key: string]: { background: string; color: string } } = {
-    'TODO': { background: '#fef3c7', color: '#92400e' },
-    'IN_PROGRESS': { background: '#dbeafe', color: '#1d4ed8' },
-    'IN_REVIEW': { background: '#ede9fe', color: '#6d28d9' },
-    'DONE': { background: '#dcfce7', color: '#166534' },
+const taskStatusPills: { [key: string]: string } = {
+    'TODO': 'badge-pill--amber',
+    'IN_PROGRESS': 'badge-pill--indigo',
+    'IN_REVIEW': 'badge-pill--cyan',
+    'DONE': 'badge-pill--emerald',
 };
 
 const TaskColumn: React.FC<Props> = ({ status, tasks, onTaskClick }) => {
     const filtered = tasks.filter(t => t.status === status);
-    const colors = taskStatusColors[status] || { background: '#f3f4f6', color: '#374151' };
+    const pillClass = taskStatusPills[status] || 'badge-pill--indigo';
 
     return (
-        <div style={{ flex: 1, minWidth: 280, background: '#f5f5f5', borderRadius: 8, padding: 12 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <span style={{ fontWeight: 600, fontSize: 14 }}>{taskStatusLabels[status]}</span>
-                <span style={{ ...badgeStyle, background: colors.background, color: colors.color }}>{filtered.length}</span>
+        <div
+            style={{
+                flex: 1,
+                minWidth: 0,
+                background: 'rgba(248, 250, 252, 0.95)',
+                border: '1px solid rgba(226, 232, 240, 0.8)',
+                borderRadius: '16px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: '#1e293b' }}>{taskStatusLabels[status]}</span>
+                <span className={`badge-pill ${pillClass}`} style={{ padding: '2px 8px', fontSize: '11px' }}>{filtered.length}</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minHeight: 200, maxHeight: 600, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 180, maxHeight: 600, overflowY: 'auto' }}>
                 {filtered.length === 0 ? (
                     <div style={emptyStyle}>No tasks in this column</div>
                 ) : (
@@ -45,21 +56,15 @@ const TaskColumn: React.FC<Props> = ({ status, tasks, onTaskClick }) => {
     );
 };
 
-const badgeStyle: React.CSSProperties = {
-    borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 700,
-    minWidth: 28,
-    padding: '4px 8px',
-    textAlign: 'center',
-};
-
 const emptyStyle: React.CSSProperties = {
-    border: '1px dashed #d1d5db',
-    borderRadius: 8,
-    color: '#6b7280',
-    padding: 16,
+    border: '1px dashed #cbd5e1',
+    borderRadius: '12px',
+    color: '#94a3b8',
+    padding: '24px 12px',
     textAlign: 'center',
+    fontSize: '12px',
+    fontWeight: 500,
+    background: '#ffffff'
 };
 
 export default TaskColumn;

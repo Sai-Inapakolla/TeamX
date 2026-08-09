@@ -13,6 +13,7 @@ public class LoginResponse {
     private UserInfo user;
     private List<TenantInfo> tenants;
     private boolean requiresTenantSelection;
+    private boolean passwordResetRequired;
     private TenantInfo activeTenant;
 
     @Data

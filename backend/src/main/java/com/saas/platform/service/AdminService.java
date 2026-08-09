@@ -30,8 +30,9 @@ public class AdminService {
             throw new IllegalStateException("Cannot assign users to other tenants");
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!userRepository.existsById(request.getUserId())) {
+            throw new RuntimeException("User not found");
+        }
 
         UserTenant.Role role = UserTenant.Role.valueOf(request.getRole());
 

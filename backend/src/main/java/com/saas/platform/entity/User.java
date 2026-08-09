@@ -28,6 +28,10 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "password_reset_required", nullable = false)
+    @Builder.Default
+    private boolean passwordResetRequired = false;
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -51,6 +55,6 @@ public class User {
     private Instant updatedAt;
 
     public enum UserStatus {
-        ACTIVE, INACTIVE, LOCKED
+        ACTIVE, INACTIVE, LOCKED, PENDING
     }
 }

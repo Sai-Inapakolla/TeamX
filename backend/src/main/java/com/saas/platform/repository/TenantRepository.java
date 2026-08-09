@@ -10,4 +10,6 @@ import java.util.List;
 public interface TenantRepository extends JpaRepository<Tenant, Long> {
 
     List<Tenant> findByStatus(Tenant.TenantStatus status);
+
+    boolean existsBySubdomain(String subdomain);
 }

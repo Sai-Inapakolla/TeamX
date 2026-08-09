@@ -18,10 +18,15 @@ class RolePermissionMapperTest {
         assertTrue(permissions.contains("TASK_READ"));
         assertTrue(permissions.contains("TASK_WRITE"));
         assertTrue(permissions.contains("TASK_ASSIGN"));
+        assertTrue(permissions.contains("TICKET_READ"));
+        assertTrue(permissions.contains("TICKET_WRITE"));
+        assertTrue(permissions.contains("TICKET_ASSIGN"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_READ"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_UPLOAD"));
         assertTrue(permissions.contains("USER_MANAGE"));
         assertTrue(permissions.contains("TENANT_SETTINGS"));
         
-        assertEquals(7, permissions.size());
+        assertEquals(12, permissions.size());
     }
 
     @Test
@@ -33,11 +38,16 @@ class RolePermissionMapperTest {
         assertTrue(permissions.contains("TASK_READ"));
         assertTrue(permissions.contains("TASK_WRITE"));
         assertTrue(permissions.contains("TASK_ASSIGN"));
+        assertTrue(permissions.contains("TICKET_READ"));
+        assertTrue(permissions.contains("TICKET_WRITE"));
+        assertTrue(permissions.contains("TICKET_ASSIGN"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_READ"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_UPLOAD"));
         
         assertFalse(permissions.contains("USER_MANAGE"));
         assertFalse(permissions.contains("TENANT_SETTINGS"));
         
-        assertEquals(5, permissions.size());
+        assertEquals(10, permissions.size());
     }
 
     @Test
@@ -47,13 +57,17 @@ class RolePermissionMapperTest {
         assertTrue(permissions.contains("PROJECT_READ"));
         assertTrue(permissions.contains("TASK_READ"));
         assertTrue(permissions.contains("TASK_WRITE"));
+        assertTrue(permissions.contains("TICKET_READ"));
+        assertTrue(permissions.contains("TICKET_WRITE"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_READ"));
+        assertTrue(permissions.contains("TICKET_ATTACHMENT_UPLOAD"));
         
         assertFalse(permissions.contains("PROJECT_WRITE"));
         assertFalse(permissions.contains("TASK_ASSIGN"));
         assertFalse(permissions.contains("USER_MANAGE"));
         assertFalse(permissions.contains("TENANT_SETTINGS"));
         
-        assertEquals(3, permissions.size());
+        assertEquals(7, permissions.size());
     }
 
     @Test

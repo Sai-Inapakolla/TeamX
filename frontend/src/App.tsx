@@ -2,16 +2,17 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import PermissionGuard from './components/permissions/PermissionGuard';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import ProjectsList from './pages/projects/ProjectsList';
-import ProjectDetails from './pages/projects/ProjectDetails';
-import TeamsPage from './pages/teams/TeamsPage';
-import AnalyticsPage from './pages/analytics/AnalyticsPage';
-import TasksPage from './pages/tasks/TasksPage';
-import UsersPage from './pages/users/UsersPage';
-import OrganizationSettings from './pages/tenant/OrganizationSettings';
+import Login from './views/Login';
+import Register from './views/Register';
+import AcceptInvite from './views/AcceptInvite';
+import Dashboard from './views/Dashboard';
+import ProjectsList from './views/projects/ProjectsList';
+import ProjectDetails from './views/projects/ProjectDetails';
+import TeamsPage from './views/teams/TeamsPage';
+import AnalyticsPage from './views/analytics/AnalyticsPage';
+import TasksPage from './views/tasks/TasksPage';
+import UsersPage from './views/users/UsersPage';
+import OrganizationSettings from './views/tenant/OrganizationSettings';
 import './styles/App.css';
 
 const DashboardEntryRoute: React.FC = () => {
@@ -52,6 +53,7 @@ const App: React.FC = () => {
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/accept-invite" element={<AcceptInvite />} />
                     <Route path="/company/:companyId/login" element={<Login />} />
                     <Route path="/dashboard" element={<DashboardEntryRoute />} />
                     <Route

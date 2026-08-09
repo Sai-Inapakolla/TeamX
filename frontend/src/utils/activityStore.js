@@ -17,14 +17,15 @@ const writeJson = (key, value) => {
 const emit = (name) => window.dispatchEvent(new Event(name));
 
 /**
- * @param {{ message: string, projectId?: number | string | null, type?: string, meta?: Record<string, unknown> }} params
+ * @param {{ message: string, projectId?: number | string | null, taskId?: number | string | null, type?: string, meta?: Record<string, unknown> }} params
  */
-export const recordActivity = ({ message, projectId = undefined, type = 'activity', meta = {} }) => {
+export const recordActivity = ({ message, projectId = undefined, taskId = undefined, type = 'activity', meta = {} }) => {
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const entry = {
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         message,
         projectId,
+        taskId,
         type,
         meta,
         actor: user?.email || 'Unknown user',
@@ -40,10 +41,15 @@ export const recordActivity = ({ message, projectId = undefined, type = 'activit
 /**
  * @param {number} [limit]
  * @param {number | string | null} [projectId]
+ * @param {number | string | null} [taskId]
  */
-export const getActivityLogs = (limit = 10, projectId = undefined) => {
+export const getActivityLogs = (limit = 10, projectId = undefined, taskId = undefined) => {
     const logs = readJson(ACTIVITY_KEY);
-    const filtered = projectId == null ? logs : logs.filter((log) => String(log.projectId) === String(projectId));
+    const filtered = logs.filter((log) => {
+        if (taskId != null && String(log.taskId) !== String(taskId)) return false;
+        if (projectId != null && String(log.projectId) !== String(projectId)) return false;
+        return true;
+    });
     return filtered.slice(0, limit);
 };
 

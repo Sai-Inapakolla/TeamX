@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { projectService, Project } from '../../services/projectService';
+import { FolderPlus, X } from 'lucide-react';
 
 interface Props {
     onClose: () => void;
@@ -28,22 +29,47 @@ const CreateProjectModal: React.FC<Props> = ({ onClose, onCreated }) => {
     };
 
     return (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'white', padding: 20, borderRadius: 8, width: 480 }}>
-                <h2>Create Project</h2>
-                {error && <div style={{ color: 'red' }}>{error}</div>}
+        <div className="modal-overlay">
+            <div className="modal-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', display: 'grid', placeItems: 'center' }}>
+                            <FolderPlus size={20} />
+                        </div>
+                        <h2 style={{ margin: 0 }}>Create New Project</h2>
+                    </div>
+                    <button type="button" onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}>
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {error && <div className="form-error">{error}</div>}
+
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: 8 }}>
-                        <label>Project name</label>
-                        <input required style={{ width: '100%', padding: 8 }} value={name} onChange={(e) => setName(e.target.value)} />
+                    <div className="form-row">
+                        <label htmlFor="project-name">Project Name</label>
+                        <input
+                            id="project-name"
+                            required
+                            className="form-input"
+                            placeholder="e.g. AI Sprint Planner"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
                     </div>
-                    <div style={{ marginBottom: 8 }}>
-                        <label>Description</label>
-                        <textarea style={{ width: '100%', padding: 8 }} value={description} onChange={(e) => setDescription(e.target.value)} />
+                    <div className="form-row">
+                        <label htmlFor="project-desc">Description</label>
+                        <textarea
+                            id="project-desc"
+                            className="form-input form-textarea"
+                            placeholder="Summarize sprint goals and scope..."
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
                     </div>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <div className="modal-actions">
                         <button type="button" onClick={onClose}>Cancel</button>
-                        <button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create'}</button>
+                        <button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Project'}</button>
                     </div>
                 </form>
             </div>
