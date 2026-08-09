@@ -42,7 +42,7 @@ cloudinary:
   url: ${CLOUDINARY_URL:}
 
 jwt:
-  secret: ${JWT_SECRET:dev-secret-key-for-local-development-only-change-in-production-min-32-chars!!}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
