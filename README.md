@@ -258,6 +258,19 @@ npm run lint
 
 ---
 
+## 📊 Performance & Benchmark Results
+
+The platform has been stress-tested using **k6** against a seeded multi-tenant database (**50 tenants × 20 projects × 100 tasks = 100,000 total tasks**).
+
+| Benchmark Scenario | Load Profile | Key Findings & Metrics | Result |
+| :--- | :--- | :--- | :---: |
+| **Concurrent Tenants** | 50 concurrent VUs performing tenant operations | • **5,024** tenant operations served<br>• **12.04 ms** median response time (p50)<br>• **139.17 ms** 95th percentile latency (p95)<br>• **0.00%** error rate (25,170 HTTP requests) | ✅ PASSED |
+| **Tenant Isolation Security** | Multi-tenant cross-query stress test under load | • **102,982** row-level security assertions<br>• **0** cross-tenant data leaks (`isolation_failures = 0`)<br>• **0.00%** isolation error rate | ✅ PASSED |
+
+> For benchmark setup details and instructions on executing k6 tests, see [`benchmarks/README.md`](benchmarks/README.md).
+
+---
+
 ## 📚 Documentation Links
 
 - 📖 [Architecture & Multi-Tenancy Specification](docs/architecture.md)

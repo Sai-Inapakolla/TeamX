@@ -89,4 +89,6 @@ docker-compose.override.yml
 *.jar.original
 direct-deps.txt
 effective-pom
-
+# Executables & Binaries
+*.exe
+benchmarks/k6.exe
