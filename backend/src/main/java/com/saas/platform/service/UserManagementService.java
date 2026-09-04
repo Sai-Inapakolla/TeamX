@@ -16,13 +16,11 @@ import com.saas.platform.security.SecurityUtils;
 import com.saas.platform.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -31,11 +29,8 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class UserManagementService {
-
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final char[] TEMP_PASSWORD_CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%*?_+-".toCharArray();
-    private static final int TEMP_PASSWORD_LENGTH = 20;
 
     private final UserRepository userRepository;
     private final UserTenantRepository userTenantRepository;

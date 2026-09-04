@@ -50,6 +50,8 @@ type Metric = {
     helper: string;
     icon: React.ElementType;
     tone: string;
+    to?: string;
+    onClick?: () => void;
 };
 
 type BoardTask = {
@@ -100,6 +102,7 @@ const Dashboard: React.FC = () => {
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [notifications, setNotifications] = useState<DashboardNotification[]>(() => getNotifications());
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [riskModalOpen, setRiskModalOpen] = useState(false);
 
     useEffect(() => {
         document.documentElement.dataset.theme = themeMode;
@@ -179,9 +182,16 @@ const Dashboard: React.FC = () => {
         return liveTasks.filter((t) => t.status !== 'DONE' && t.status !== 'COMPLETED').length;
     }, [liveTasks]);
 
-    const riskAlertsCount = useMemo(() => {
-        return liveTasks.filter((t) => t.priority === 'HIGH' || t.priority === 'High' || t.priority === 'CRITICAL').length;
+    const activeRiskTasks = useMemo(() => {
+        return liveTasks.filter(
+            (t) =>
+                t.status !== 'DONE' &&
+                t.status !== 'COMPLETED' &&
+                (t.priority === 'HIGH' || t.priority === 'High' || t.priority === 'CRITICAL')
+        );
     }, [liveTasks]);
+
+    const riskAlertsCount = activeRiskTasks.length;
 
     const velocityRate = useMemo(() => {
         if (liveTasks.length === 0) return 0;
@@ -196,6 +206,7 @@ const Dashboard: React.FC = () => {
                 helper: `${projects.length} total tracked`,
                 icon: FolderKanban,
                 tone: 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20',
+                to: '/projects',
             },
             {
                 label: 'Open Tasks',
@@ -203,6 +214,7 @@ const Dashboard: React.FC = () => {
                 helper: `${liveTasks.length} total tasks`,
                 icon: CheckCircle2,
                 tone: 'bg-lime-500/10 text-lime-500 border border-lime-500/20',
+                to: '/tasks',
             },
             {
                 label: 'Team Velocity',
@@ -210,13 +222,18 @@ const Dashboard: React.FC = () => {
                 helper: `${liveCompletedCount} tasks completed`,
                 icon: Activity,
                 tone: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+                to: '/analytics',
             },
             {
                 label: 'Risk Alerts',
                 value: String(riskAlertsCount),
-                helper: `${riskAlertsCount} high priority`,
+                helper: riskAlertsCount === 0 ? 'All risks resolved' : `${riskAlertsCount} high priority open`,
                 icon: AlertTriangle,
-                tone: 'bg-rose-500/10 text-rose-500 border border-rose-500/20',
+                tone:
+                    riskAlertsCount === 0
+                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                        : 'bg-rose-500/10 text-rose-500 border border-rose-500/20',
+                onClick: () => setRiskModalOpen(true),
             },
         ],
         [activeProjectsCount, projects.length, liveOpenCount, liveTasks.length, velocityRate, liveCompletedCount, riskAlertsCount]
@@ -294,18 +311,40 @@ const Dashboard: React.FC = () => {
                                 <div className="mt-6 grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
                                     {metrics.map((metric) => {
                                         const Icon = metric.icon;
-                                        return (
-                                            <div key={metric.label} className={themeMode === 'dark' ? 'rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition hover:border-slate-700' : 'rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 transition hover:border-slate-300 hover:bg-white'}>
+                                        const cardContent = (
+                                            <>
                                                 <div className="flex items-center justify-between gap-3">
-                                                    <div className={`grid h-10 w-10 place-items-center rounded-xl ${metric.tone}`}>
+                                                    <div className={`grid h-10 w-10 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-110 ${metric.tone}`}>
                                                         <Icon size={18} />
                                                     </div>
-                                                    <ArrowUpRight size={17} className="text-slate-400" />
+                                                    <ArrowUpRight
+                                                        size={17}
+                                                        className="text-slate-400 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400"
+                                                    />
                                                 </div>
                                                 <div className={themeMode === 'dark' ? 'mt-4 text-3xl font-extrabold text-slate-100' : 'mt-4 text-3xl font-extrabold text-slate-950'}>{metric.value}</div>
                                                 <div className={themeMode === 'dark' ? 'mt-1 text-xs font-bold text-slate-300' : 'mt-1 text-xs font-bold text-slate-700'}>{metric.label}</div>
                                                 <div className={themeMode === 'dark' ? 'mt-0.5 text-xs text-slate-400' : 'mt-0.5 text-xs text-slate-500'}>{metric.helper}</div>
-                                            </div>
+                                            </>
+                                        );
+
+                                        const baseClass =
+                                            themeMode === 'dark'
+                                                ? 'group block w-full text-left cursor-pointer rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition-all duration-200 hover:-translate-y-1 hover:border-cyan-500/50 hover:bg-slate-900/90 hover:shadow-lg hover:shadow-cyan-500/10'
+                                                : 'group block w-full text-left cursor-pointer rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 transition-all duration-200 hover:-translate-y-1 hover:border-cyan-500/50 hover:bg-white hover:shadow-lg hover:shadow-cyan-500/10';
+
+                                        if (metric.onClick) {
+                                            return (
+                                                <button key={metric.label} onClick={metric.onClick} className={baseClass}>
+                                                    {cardContent}
+                                                </button>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link key={metric.label} to={metric.to || '#'} className={baseClass}>
+                                                {cardContent}
+                                            </Link>
                                         );
                                     })}
                                 </div>
@@ -521,13 +560,21 @@ const Dashboard: React.FC = () => {
                                         </div>
                                     ) : (
                                         projects.slice(0, 3).map((project) => (
-                                            <article key={project.id} className={themeMode === 'dark' ? 'rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition hover:border-slate-700' : 'rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 transition hover:border-slate-300'}>
+                                            <Link
+                                                key={project.id}
+                                                to={`/projects/${project.id}`}
+                                                className={
+                                                    themeMode === 'dark'
+                                                        ? 'block cursor-pointer rounded-xl border border-slate-800 bg-slate-950/60 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-500/40 hover:bg-slate-900/80 hover:shadow-md'
+                                                        : 'block cursor-pointer rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-500/40 hover:bg-white hover:shadow-md'
+                                                }
+                                            >
                                                 <div className="mb-3 flex items-center justify-between gap-3">
                                                     <h3 className={themeMode === 'dark' ? 'text-sm font-bold text-slate-100' : 'text-sm font-bold text-slate-950'}>{project.name}</h3>
                                                     <span className={themeMode === 'dark' ? 'rounded-md bg-slate-800 px-2 py-0.5 text-[11px] font-bold text-slate-300' : 'rounded-md bg-white px-2 py-0.5 text-[11px] font-bold text-slate-600 border border-slate-200'}>{project.status}</span>
                                                 </div>
                                                 <p className={themeMode === 'dark' ? 'line-clamp-3 text-xs leading-relaxed text-slate-400' : 'line-clamp-3 text-xs leading-relaxed text-slate-600'}>{project.description || 'No description provided.'}</p>
-                                            </article>
+                                            </Link>
                                         ))
                                     )}
                                 </div>
@@ -545,6 +592,79 @@ const Dashboard: React.FC = () => {
                     onClose={() => setSelectedTask(null)}
                     onUpdated={loadProjects}
                 />
+            )}
+
+            {/* Risk & Blocker Inspector Modal */}
+            {riskModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
+                    <div className={themeMode === 'dark' ? 'w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150' : 'w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150'}>
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-800 dark:border-slate-800 border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <div className={`grid h-10 w-10 place-items-center rounded-xl ${activeRiskTasks.length === 0 ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'}`}>
+                                    <AlertTriangle size={20} />
+                                </div>
+                                <div>
+                                    <h3 className={themeMode === 'dark' ? 'text-lg font-bold text-slate-100' : 'text-lg font-bold text-slate-900'}>Risk & Blocker Alerts</h3>
+                                    <p className={themeMode === 'dark' ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>
+                                        {activeRiskTasks.length === 0 ? 'All systems clear — no active high-risk tasks' : `${activeRiskTasks.length} open high priority task(s) requiring attention`}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => setRiskModalOpen(false)} className={themeMode === 'dark' ? 'rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200' : 'rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800'}>
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="mt-4 max-h-80 overflow-y-auto space-y-3 pr-1">
+                            {activeRiskTasks.length === 0 ? (
+                                <div className="py-8 text-center">
+                                    <CheckCircle2 size={36} className="mx-auto mb-2.5 text-emerald-500" />
+                                    <p className={themeMode === 'dark' ? 'font-bold text-slate-100 text-sm' : 'font-bold text-slate-900 text-sm'}>Zero Active Risks</p>
+                                    <p className={themeMode === 'dark' ? 'text-xs mt-1 text-slate-400' : 'text-xs mt-1 text-slate-500'}>All high priority sprint tasks have already been completed.</p>
+                                </div>
+                            ) : (
+                                activeRiskTasks.map((task) => (
+                                    <div
+                                        key={task.id}
+                                        onClick={() => {
+                                            setRiskModalOpen(false);
+                                            setSelectedTask(task);
+                                        }}
+                                        className={themeMode === 'dark' ? 'cursor-pointer rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 transition hover:border-rose-500/50 hover:bg-slate-950' : 'cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-3.5 transition hover:border-rose-500/50 hover:bg-white'}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className={themeMode === 'dark' ? 'text-sm font-bold text-slate-100' : 'text-sm font-bold text-slate-900'}>{task.title}</span>
+                                            <span className="rounded-md bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-500 uppercase">{task.priority}</span>
+                                        </div>
+                                        <p className={themeMode === 'dark' ? 'mt-1 text-xs text-slate-400 line-clamp-2' : 'mt-1 text-xs text-slate-500 line-clamp-2'}>{task.description || 'No description provided'}</p>
+                                        <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+                                            <span>Status: <strong className="text-cyan-400">{task.status}</strong></span>
+                                            <span className="text-cyan-500 font-semibold hover:underline">Inspect Task &rarr;</span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="mt-5 flex justify-between items-center pt-3 border-t border-slate-800 dark:border-slate-800 border-slate-100">
+                            <button
+                                onClick={() => {
+                                    setRiskModalOpen(false);
+                                    navigate('/tasks');
+                                }}
+                                className="text-xs font-bold text-cyan-500 hover:underline"
+                            >
+                                View in Tasks Board &rarr;
+                            </button>
+                            <button
+                                onClick={() => setRiskModalOpen(false)}
+                                className={themeMode === 'dark' ? 'rounded-xl bg-slate-800 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-700' : 'rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200'}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

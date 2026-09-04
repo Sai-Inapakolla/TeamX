@@ -42,7 +42,7 @@ cloudinary:
   url: ${CLOUDINARY_URL:}
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:dev_secret_key_for_jwt_token_generation_which_is_at_least_256_bits_long_teamx}
   expiration: ${JWT_EXPIRATION:86400000}
   refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 

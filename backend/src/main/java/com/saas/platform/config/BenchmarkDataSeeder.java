@@ -35,6 +35,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @Profile("benchmark")
+@SuppressWarnings("null")
 public class BenchmarkDataSeeder implements CommandLineRunner {
 
     static final int NUM_TENANTS         = 50;
@@ -109,7 +110,7 @@ public class BenchmarkDataSeeder implements CommandLineRunner {
         for (int i = 1; i <= NUM_TENANTS; i++) {
             tenantIds.add(insertAndReturnKey(
                     "INSERT INTO tenants (name, subdomain, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-                    now, "Benchmark Tenant " + i, "bench-" + i, "ACTIVE", now, now));
+                    "Benchmark Tenant " + i, "bench-" + i, "ACTIVE", now, now));
         }
         log.info("  ✓ {} tenants", tenantIds.size());
 
@@ -119,7 +120,6 @@ public class BenchmarkDataSeeder implements CommandLineRunner {
             userIds.add(insertAndReturnKey(
                     "INSERT INTO users (email, password_hash, password_reset_required, first_name, last_name, status, created_at, updated_at) "
                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    now,
                     "bench-user-" + i + "@teamx.test", hash,
                     false,
                     "Bench", "User" + i, "ACTIVE", now, now));
@@ -142,7 +142,6 @@ public class BenchmarkDataSeeder implements CommandLineRunner {
                 pids.add(insertAndReturnKey(
                         "INSERT INTO projects (tenant_id, name, description, owner_id, status, created_by, created_at, updated_at) "
                                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                        now,
                         tenantIds.get(t),
                         "Benchmark Project " + p,
                         "Auto-generated project for load testing",
@@ -204,11 +203,10 @@ public class BenchmarkDataSeeder implements CommandLineRunner {
      * Execute a single INSERT and return the generated primary key.
      *
      * @param sql  INSERT statement with {@code ?} placeholders
-     * @param ts   timestamp (unused but keeps the varargs tidy; pass any non-null value)
      * @param args parameter values matching the {@code ?} markers
      * @return the auto-generated key
      */
-    private Long insertAndReturnKey(String sql, @SuppressWarnings("unused") Timestamp ts, Object... args) {
+    private Long insertAndReturnKey(String sql, Object... args) {
         GeneratedKeyHolder kh = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -217,6 +215,10 @@ public class BenchmarkDataSeeder implements CommandLineRunner {
             }
             return ps;
         }, kh);
-        return kh.getKey().longValue();
+        Number key = kh.getKey();
+        if (key == null) {
+            throw new IllegalStateException("Failed to retrieve generated key for insert: " + sql);
+        }
+        return key.longValue();
     }
 }

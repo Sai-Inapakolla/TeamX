@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@SuppressWarnings("null")
 class TenantIsolationTest {
 
     @Autowired
@@ -34,7 +35,6 @@ class TenantIsolationTest {
     private Tenant tenant1;
     private Tenant tenant2;
     private User user1;
-    private User user2;
 
     @BeforeEach
     void setup() {
@@ -66,7 +66,7 @@ class TenantIsolationTest {
                 .updatedAt(Instant.now())
                 .build());
 
-        user2 = userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .email("user2@tenant2.com")
                 .passwordHash("hashedpass")
                 .firstName("User")
@@ -103,7 +103,7 @@ class TenantIsolationTest {
 
     @Test
     void testUserTenantCannotBeCreatedTwice() {
-        UserTenant first = userTenantRepository.save(UserTenant.builder()
+        userTenantRepository.save(UserTenant.builder()
                 .userId(user1.getId())
                 .tenantId(tenant1.getId())
                 .role(UserTenant.Role.ORG_ADMIN)
@@ -141,7 +141,7 @@ class TenantIsolationTest {
 
     @Test
     void testUserTenantRoleAssignment() {
-        UserTenant admin = userTenantRepository.save(UserTenant.builder()
+        userTenantRepository.save(UserTenant.builder()
                 .userId(user1.getId())
                 .tenantId(tenant1.getId())
                 .role(UserTenant.Role.ORG_ADMIN)

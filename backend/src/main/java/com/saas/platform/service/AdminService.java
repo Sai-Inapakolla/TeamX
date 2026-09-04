@@ -2,7 +2,6 @@ package com.saas.platform.service;
 
 import com.saas.platform.dto.UserTenantAssignmentRequest;
 import com.saas.platform.dto.UserTenantAssignmentResponse;
-import com.saas.platform.entity.User;
 import com.saas.platform.entity.UserTenant;
 import com.saas.platform.repository.UserRepository;
 import com.saas.platform.repository.UserTenantRepository;
@@ -17,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class AdminService {
 
     private final UserRepository userRepository;

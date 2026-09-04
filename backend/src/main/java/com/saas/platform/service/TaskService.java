@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class TaskService {
 
     private final TaskRepository taskRepository;
@@ -40,7 +41,6 @@ public class TaskService {
     }
 
     @Transactional
-    @SuppressWarnings("null")
     @PreAuthorize("hasAuthority('TASK_WRITE')")
     public TaskDTO createTask(TaskDTO dto) {
         Long currentUserId = SecurityUtils.getCurrentUserId();

@@ -1,6 +1,5 @@
 package com.saas.platform.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.saas.platform.dto.TaskAttachmentDTO;
@@ -29,6 +28,7 @@ import java.util.HashMap;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class TaskAttachmentService {
 
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(
