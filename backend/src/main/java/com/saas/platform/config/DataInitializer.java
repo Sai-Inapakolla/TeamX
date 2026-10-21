@@ -19,6 +19,7 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@org.springframework.context.annotation.Profile("!prod")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
@@ -29,7 +30,6 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    @SuppressWarnings("null")
     public void run(String... args) {
         Tenant tenant = tenantRepository.findAll().stream().findFirst().orElse(null);
         User user = userRepository.findAll().stream().findFirst().orElse(null);

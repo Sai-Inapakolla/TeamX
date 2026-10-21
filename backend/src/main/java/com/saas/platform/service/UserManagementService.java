@@ -37,6 +37,9 @@ public class UserManagementService {
     private final EmailService emailService;
     private final TenantRepository tenantRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
     @Transactional(readOnly = true)
     public List<UserManagementDTO> listUsers() {
         Long tenantId = TenantContext.getCurrentTenantId();
@@ -100,7 +103,7 @@ public class UserManagementService {
         emailService.sendInvitationEmail(normalizedEmail, token, tenantName, inviterName);
 
         UserManagementDTO dto = toDto(user, membership);
-        dto.setInviteUrl("http://localhost:3000/accept-invite?token=" + token);
+        dto.setInviteUrl(frontendUrl + "/accept-invite?token=" + token);
         
         return dto;
     }

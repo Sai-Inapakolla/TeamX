@@ -20,17 +20,71 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Response interceptor with automatic token refresh
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        if (error.response?.status === 401) {
+        const originalRequest = error.config;
+        const isAuthEndpoint = originalRequest?.url?.includes('/auth/login') ||
+                               originalRequest?.url?.includes('/auth/refresh') ||
+                               originalRequest?.url?.includes('/auth/register');
+
+        if (error.response?.status === 401 && !isAuthEndpoint && originalRequest && !originalRequest._retry) {
+            originalRequest._retry = true;
+            const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+            const activeTenantRaw = typeof window !== 'undefined' ? localStorage.getItem('activeTenant') : null;
+
+            if (refreshToken) {
+                try {
+                    let tenantId = null;
+                    if (activeTenantRaw) {
+                        try {
+                            tenantId = JSON.parse(activeTenantRaw)?.id ?? null;
+                        } catch {
+                            // ignore malformed activeTenant
+                        }
+                    }
+
+                    const refreshResponse = await axios.post(
+                        `${api.defaults.baseURL}/auth/refresh`,
+                        { refreshToken, tenantId },
+                        { headers: { 'Content-Type': 'application/json' } }
+                    );
+
+                    const newAccessToken = refreshResponse.data?.accessToken;
+                    if (newAccessToken) {
+                        localStorage.setItem('accessToken', newAccessToken);
+                        if (refreshResponse.data?.refreshToken) {
+                            localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
+                        }
+                        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                        return api(originalRequest);
+                    }
+                } catch (refreshErr) {
+                    // Refresh token invalid or expired
+                    if (typeof window !== 'undefined') {
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('activeTenant');
+                        if (window.location.pathname !== '/login') {
+                            window.location.href = '/login';
+                        }
+                    }
+                    return Promise.reject(refreshErr);
+                }
+            }
+        }
+
+        // If 401 on non-login page and no refresh possible, redirect to login
+        if (error.response?.status === 401 && !isAuthEndpoint && typeof window !== 'undefined' && window.location.pathname !== '/login') {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
             localStorage.removeItem('activeTenant');
             window.location.href = '/login';
         }
+
         return Promise.reject(error);
     }
 );
