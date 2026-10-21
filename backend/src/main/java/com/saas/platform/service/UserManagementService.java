@@ -100,7 +100,17 @@ public class UserManagementService {
         User currentUser = currentUserId != null ? userRepository.findById(currentUserId).orElse(null) : null;
         String inviterName = currentUser != null ? joinName(currentUser.getFirstName(), currentUser.getLastName()) : null;
 
-        emailService.sendInvitationEmail(normalizedEmail, token, tenantName, inviterName);
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            emailService.sendInvitationEmail(normalizedEmail, token, tenantName, inviterName);
+                        }
+                    });
+        } else {
+            emailService.sendInvitationEmail(normalizedEmail, token, tenantName, inviterName);
+        }
 
         UserManagementDTO dto = toDto(user, membership);
         dto.setInviteUrl(frontendUrl + "/accept-invite?token=" + token);

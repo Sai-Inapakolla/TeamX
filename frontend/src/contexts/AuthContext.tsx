@@ -26,7 +26,20 @@ const parsePermissionsFromToken = (token: string): string[] => {
         const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
         const padLength = (4 - (normalized.length % 4)) % 4;
         const padded = normalized + '='.repeat(padLength);
-        const decoded = JSON.parse(atob(padded));
+
+        let jsonStr: string;
+        try {
+            const binary = atob(padded);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            jsonStr = new TextDecoder().decode(bytes);
+        } catch {
+            jsonStr = atob(padded);
+        }
+
+        const decoded = JSON.parse(jsonStr);
         return Array.isArray(decoded.permissions)
             ? decoded.permissions.filter((permission: unknown) => typeof permission === 'string')
             : [];

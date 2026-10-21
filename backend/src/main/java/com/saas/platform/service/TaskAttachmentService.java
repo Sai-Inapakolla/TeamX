@@ -39,6 +39,7 @@ public class TaskAttachmentService {
 
     private final TaskRepository taskRepository;
     private final TaskAttachmentRepository taskAttachmentRepository;
+    private final Cloudinary cloudinary;
 
     @Value("${cloudinary.url:}")
     private String cloudinaryUrl;
@@ -58,8 +59,11 @@ public class TaskAttachmentService {
         Long tenantId = TenantContext.getCurrentTenantId();
         assertTaskExists(tenantId, projectId, taskId);
         validateUpload(file);
+        if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Cloud storage service is not configured");
+        }
 
-        CloudinaryUploadResult uploadResult = uploadToCloudinary(file);
+        CloudinaryUploadResult uploadResult = uploadToCloudinary(file, tenantId, taskId);
 
         TaskAttachment attachment = TaskAttachment.builder()
                 .taskId(taskId)
@@ -78,8 +82,7 @@ public class TaskAttachmentService {
         } catch (Exception e) {
             // Compensate: clean up the Cloudinary asset since DB save failed
             try {
-                Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-                cloudinary.uploader().destroy(uploadResult.publicId(), ObjectUtils.asMap("resource_type", uploadResult.resourceType()));
+                this.cloudinary.uploader().destroy(uploadResult.publicId(), ObjectUtils.asMap("resource_type", uploadResult.resourceType()));
             } catch (Exception cleanupEx) {
                 log.error("Failed to clean up Cloudinary asset {} after DB save failure", uploadResult.publicId(), cleanupEx);
             }
@@ -98,8 +101,7 @@ public class TaskAttachmentService {
         taskAttachmentRepository.delete(attachment);
 
         try {
-            Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-            cloudinary.uploader().destroy(attachment.getCloudinaryPublicId(), ObjectUtils.asMap("resource_type", attachment.getResourceType()));
+            this.cloudinary.uploader().destroy(attachment.getCloudinaryPublicId(), ObjectUtils.asMap("resource_type", attachment.getResourceType()));
         } catch (IOException e) {
             log.error("Failed to delete Cloudinary asset {}", attachment.getCloudinaryPublicId(), e);
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Cloudinary delete failed");
@@ -167,15 +169,14 @@ public class TaskAttachmentService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
     }
 
-    private CloudinaryUploadResult uploadToCloudinary(MultipartFile file) {
+    private CloudinaryUploadResult uploadToCloudinary(MultipartFile file, Long tenantId, Long taskId) {
         try {
-            Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
             Map<String, Object> uploadOptions = new HashMap<>();
-            uploadOptions.put("folder", "teamx/tickets");
+            uploadOptions.put("folder", String.format("teamx/tenants/%d/tasks/%d", tenantId, taskId));
             uploadOptions.put("resource_type", "auto");
 
             @SuppressWarnings("unchecked")
-            Map<String, Object> response = cloudinary.uploader().upload(file.getBytes(), uploadOptions);
+            Map<String, Object> response = this.cloudinary.uploader().upload(file.getBytes(), uploadOptions);
 
             return new CloudinaryUploadResult(
                     Objects.toString(response.get("public_id"), ""),

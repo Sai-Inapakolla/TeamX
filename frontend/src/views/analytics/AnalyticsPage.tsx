@@ -26,48 +26,12 @@ type WorkspaceActivity = {
     createdAt: string;
 };
 
-const fallbackProjects: Project[] = [
-    {
-        id: 201,
-        name: 'AI Sprint Planner',
-        description: 'Model-assisted planning, risk summaries, and owner suggestions.',
-        ownerId: 1,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 202,
-        name: 'Customer Portal Refresh',
-        description: 'Navigation, onboarding checklist, and polished project views.',
-        ownerId: 2,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 203,
-        name: 'Analytics Workspace',
-        description: 'Velocity, blockers, tenant health, and exportable reports.',
-        ownerId: 3,
-        status: 'PLANNING',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-];
-
-const fallbackMembers = [
-    { id: 1, name: 'Admin User', email: 'admin@test.com', role: 'ADMIN', status: 'ACTIVE' },
-    { id: 2, name: 'Project Lead', email: 'lead@teamx.local', role: 'MANAGER', status: 'ACTIVE' },
-    { id: 3, name: 'Contributor', email: 'user@teamx.local', role: 'USER', status: 'ACTIVE' },
-];
 
 const AnalyticsPage: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [members, setMembers] = useState<Array<{ id: number; name: string; email: string; role: string; status: string }>>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [previewMode, setPreviewMode] = useState(false);
 
     useEffect(() => {
         const load = async () => {
@@ -77,12 +41,8 @@ const AnalyticsPage: React.FC = () => {
                 const [projectData, userData] = await Promise.all([projectService.getAll(), getUsers()]);
                 setProjects(projectData);
                 setMembers(userData);
-                setPreviewMode(false);
             } catch (err: any) {
-                setProjects(fallbackProjects);
-                setMembers(fallbackMembers);
-                setPreviewMode(true);
-                setError('');
+                setError(err?.response?.data?.message || err?.message || 'Failed to load analytics metrics');
             } finally {
                 setLoading(false);
             }
@@ -170,11 +130,6 @@ const AnalyticsPage: React.FC = () => {
                 </div>
             </div>
 
-            {previewMode && (
-                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    Live analytics data is unavailable right now, so this page is showing preview workspace metrics.
-                </div>
-            )}
 
             {loading ? (
                 <Loader label="Loading analytics..." />

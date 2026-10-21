@@ -29,11 +29,6 @@ interface TeamActivity {
     type?: string;
 }
 
-const fallbackMembers: TeamMember[] = [
-    { id: 101, name: 'Riya Shah', email: 'riya@teamx.local', role: 'ADMIN', status: 'ACTIVE' },
-    { id: 102, name: 'Aman Kapoor', email: 'aman@teamx.local', role: 'MANAGER', status: 'ACTIVE' },
-    { id: 103, name: 'Maya Jain', email: 'maya@teamx.local', role: 'USER', status: 'ACTIVE' },
-];
 
 const TeamsPage: React.FC = () => {
     const { can } = usePermissions();
@@ -44,7 +39,6 @@ const TeamsPage: React.FC = () => {
     const [showInvite, setShowInvite] = useState(false);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('ALL');
-    const [previewMode, setPreviewMode] = useState(false);
 
     const loadMembers = async () => {
         setLoading(true);
@@ -52,11 +46,8 @@ const TeamsPage: React.FC = () => {
         try {
             const data = await getUsers();
             setMembers(data);
-            setPreviewMode(false);
         } catch (err: any) {
-            setMembers(fallbackMembers);
-            setPreviewMode(true);
-            setError('');
+            setError(err?.response?.data?.message || err?.message || 'Failed to load team members');
         } finally {
             setLoading(false);
         }
@@ -130,11 +121,6 @@ const TeamsPage: React.FC = () => {
                 </div>
             </div>
 
-            {previewMode && (
-                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    Live member data is unavailable right now, so this page is showing preview team data.
-                </div>
-            )}
 
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {stats.map((stat) => {

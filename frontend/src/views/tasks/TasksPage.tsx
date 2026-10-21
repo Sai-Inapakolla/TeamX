@@ -22,44 +22,6 @@ interface Member {
     status: string;
 }
 
-const fallbackProjects: Project[] = [
-    {
-        id: 301,
-        name: 'AI Sprint Planner',
-        description: 'Model-assisted planning, risk summaries, and owner suggestions.',
-        ownerId: 1,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-    {
-        id: 302,
-        name: 'Customer Portal Refresh',
-        description: 'Navigation, onboarding checklist, and polished project views.',
-        ownerId: 2,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    },
-];
-
-const fallbackMembers: Member[] = [
-    { id: 1, name: 'Admin User', email: 'admin@test.com', role: 'ADMIN', status: 'ACTIVE' },
-    { id: 2, name: 'Project Lead', email: 'lead@teamx.local', role: 'MANAGER', status: 'ACTIVE' },
-    { id: 3, name: 'Contributor', email: 'user@teamx.local', role: 'USER', status: 'ACTIVE' },
-];
-
-const fallbackTasksByProject: Record<number, Task[]> = {
-    301: [
-        { id: 3011, projectId: 301, title: 'Map onboarding events', description: 'Create the initial tracking plan.', status: 'TODO', priority: 'MEDIUM', assignedTo: 1 },
-        { id: 3012, projectId: 301, title: 'Review risk score', description: 'Validate dashboard signals before launch.', status: 'IN_PROGRESS', priority: 'HIGH', assignedTo: 2 },
-    ],
-    302: [
-        { id: 3021, projectId: 302, title: 'Polish header layout', description: 'Tune spacing and hero text.', status: 'IN_REVIEW', priority: 'LOW', assignedTo: 3 },
-        { id: 3022, projectId: 302, title: 'Ship deployment checklist', description: 'Lock down launch steps.', status: 'DONE', priority: 'HIGH', assignedTo: 1 },
-    ],
-};
-
 const TasksPage: React.FC = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [members, setMembers] = useState<Member[]>([]);
@@ -73,7 +35,6 @@ const TasksPage: React.FC = () => {
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [assigneeFilter, setAssigneeFilter] = useState('ALL');
     const [search, setSearch] = useState('');
-    const [previewMode, setPreviewMode] = useState(false);
 
     const loadWorkspace = async () => {
         setLoading(true);
@@ -82,18 +43,11 @@ const TasksPage: React.FC = () => {
             const [projectData, userData] = await Promise.all([projectService.getAll(), getUsers()]);
             setProjects(projectData);
             setMembers(userData);
-            setPreviewMode(false);
             if (!selectedProjectId && projectData.length > 0) {
                 setSelectedProjectId(projectData[0].id);
             }
         } catch (err: any) {
-            setProjects(fallbackProjects);
-            setMembers(fallbackMembers);
-            setPreviewMode(true);
-            setError('');
-            if (!selectedProjectId && fallbackProjects.length > 0) {
-                setSelectedProjectId(fallbackProjects[0].id);
-            }
+            setError(err?.response?.data?.message || err?.message || 'Failed to load projects and members');
         } finally {
             setLoading(false);
         }
@@ -110,26 +64,20 @@ const TasksPage: React.FC = () => {
                 return;
             }
 
-            if (previewMode) {
-                setTasks(fallbackTasksByProject[selectedProjectId] || []);
-                setTasksLoading(false);
-                return;
-            }
-
             setTasksLoading(true);
             setError('');
             try {
                 const data = await taskService.getByProject(selectedProjectId);
                 setTasks(data);
             } catch (err: any) {
-                setError(err?.response?.data?.message || 'Failed to load tasks');
+                setError(err?.response?.data?.message || err?.message || 'Failed to load tasks');
             } finally {
                 setTasksLoading(false);
             }
         };
 
         loadTasks();
-    }, [previewMode, selectedProjectId]);
+    }, [selectedProjectId]);
 
     const selectedProject = useMemo(() => projects.find((project) => project.id === selectedProjectId) || null, [projects, selectedProjectId]);
 
@@ -211,11 +159,6 @@ const TasksPage: React.FC = () => {
                             Task hub
                         </div>
 
-                                    {previewMode && (
-                                        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                            Live task data is unavailable right now, so this page is showing preview workspace tasks.
-                                        </div>
-                                    )}
                         <h1 className="text-3xl font-bold text-slate-950">Tasks</h1>
                         <p className="page-muted max-w-3xl">Browse a project board, create tasks, and inspect the work queue without jumping back into a single project view.</p>
                     </div>
@@ -224,7 +167,7 @@ const TasksPage: React.FC = () => {
                             <FolderKanban size={16} />
                             Open project
                         </Link>
-                        <button onClick={handleCreateClick} disabled={previewMode} className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+                        <button onClick={handleCreateClick} className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
                             <Plus size={16} />
                             New task
                         </button>
@@ -293,11 +236,6 @@ const TasksPage: React.FC = () => {
                                 <EmptyState title="No tasks match the current filters" description="Try a different project or clear the filters." />
                             ) : (
                                 <KanbanBoard tasks={visibleTasks} onTaskClick={handleTaskClick} />
-                            )}
-                            {previewMode && (
-                                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                                    Preview mode is read-only. Connect the API session to create or update tasks.
-                                </div>
                             )}
                         </section>
 
