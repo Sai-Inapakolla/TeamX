@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@SuppressWarnings("null")
 class TenantIsolationTest {
 
     @Autowired

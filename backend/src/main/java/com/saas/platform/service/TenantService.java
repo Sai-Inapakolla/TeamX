@@ -11,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class TenantService {
 
     private final TenantRepository tenantRepository;

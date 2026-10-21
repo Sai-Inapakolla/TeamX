@@ -28,7 +28,6 @@ import java.util.HashMap;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class TaskAttachmentService {
 
     private static final List<String> ALLOWED_CONTENT_TYPES = List.of(

@@ -1,9 +1,20 @@
-const ACTIVITY_KEY = 'teamx_activity_logs';
-const NOTIFICATION_KEY = 'teamx_notifications';
+const ACTIVITY_BASE_KEY = 'teamx_activity_logs';
+const NOTIFICATION_BASE_KEY = 'teamx_notifications';
+
+const getTenantKey = (baseKey) => {
+    if (typeof window === 'undefined') return baseKey;
+    try {
+        const raw = localStorage.getItem('activeTenant');
+        const activeTenant = raw ? JSON.parse(raw) : null;
+        return activeTenant?.id ? `${baseKey}_tenant_${activeTenant.id}` : baseKey;
+    } catch {
+        return baseKey;
+    }
+};
 
 const readJson = (key) => {
     try {
-        const raw = localStorage.getItem(key);
+        const raw = localStorage.getItem(getTenantKey(key));
         return raw ? JSON.parse(raw) : [];
     } catch {
         return [];
@@ -11,7 +22,11 @@ const readJson = (key) => {
 };
 
 const writeJson = (key, value) => {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+        localStorage.setItem(getTenantKey(key), JSON.stringify(value));
+    } catch (e) {
+        console.error('Failed to save to local storage', e);
+    }
 };
 
 const emit = (name) => window.dispatchEvent(new Event(name));
@@ -32,8 +47,8 @@ export const recordActivity = ({ message, projectId = undefined, taskId = undefi
         createdAt: new Date().toISOString(),
     };
 
-    const current = readJson(ACTIVITY_KEY);
-    writeJson(ACTIVITY_KEY, [entry, ...current].slice(0, 100));
+    const current = readJson(ACTIVITY_BASE_KEY);
+    writeJson(ACTIVITY_BASE_KEY, [entry, ...current].slice(0, 100));
     emit('teamx-activity-updated');
     return entry;
 };
@@ -44,7 +59,7 @@ export const recordActivity = ({ message, projectId = undefined, taskId = undefi
  * @param {number | string | null} [taskId]
  */
 export const getActivityLogs = (limit = 10, projectId = undefined, taskId = undefined) => {
-    const logs = readJson(ACTIVITY_KEY);
+    const logs = readJson(ACTIVITY_BASE_KEY);
     const filtered = logs.filter((log) => {
         if (taskId != null && String(log.taskId) !== String(taskId)) return false;
         if (projectId != null && String(log.projectId) !== String(projectId)) return false;
@@ -66,16 +81,16 @@ export const recordNotification = ({ message, projectId = undefined, unread = tr
         createdAt: new Date().toISOString(),
     };
 
-    const current = readJson(NOTIFICATION_KEY);
-    writeJson(NOTIFICATION_KEY, [entry, ...current].slice(0, 50));
+    const current = readJson(NOTIFICATION_BASE_KEY);
+    writeJson(NOTIFICATION_BASE_KEY, [entry, ...current].slice(0, 50));
     emit('teamx-notification-updated');
     return entry;
 };
 
-export const getNotifications = () => readJson(NOTIFICATION_KEY);
+export const getNotifications = () => readJson(NOTIFICATION_BASE_KEY);
 
 export const markNotificationsRead = () => {
-    const current = readJson(NOTIFICATION_KEY).map((item) => ({ ...item, unread: false }));
-    writeJson(NOTIFICATION_KEY, current);
+    const current = readJson(NOTIFICATION_BASE_KEY).map((item) => ({ ...item, unread: false }));
+    writeJson(NOTIFICATION_BASE_KEY, current);
     emit('teamx-notification-updated');
 };

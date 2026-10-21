@@ -10,7 +10,7 @@ import NavBar from '../../components/Layout/NavBar';
 import Sidebar from '../../components/Layout/Sidebar';
 import { usePermissions } from '../../hooks/usePermissions';
 import { recordActivity, recordNotification } from '../../utils/activityStore';
-import { toUiRole } from '../../utils/permissions';
+import { toUiRole, isAdminRole } from '../../utils/permissions';
 import { Building2, Users, UserPlus, Shield, Calendar, Activity, CheckCircle2 } from 'lucide-react';
 
 const OrganizationSettings = () => {
@@ -21,7 +21,7 @@ const OrganizationSettings = () => {
     const [showInvite, setShowInvite] = useState(false);
     const { can, role } = usePermissions();
 
-    const isAdmin = role === 'ADMIN';
+    const isAdmin = isAdminRole(role);
 
     const loadOrganization = async () => {
         setLoading(true);

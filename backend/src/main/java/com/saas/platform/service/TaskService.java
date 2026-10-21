@@ -24,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class TaskService {
 
     private final TaskRepository taskRepository;

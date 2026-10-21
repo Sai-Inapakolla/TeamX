@@ -1,4 +1,5 @@
 export const ROLES = {
+    OWNER: 'OWNER',
     ADMIN: 'ADMIN',
     MANAGER: 'MANAGER',
     EMPLOYEE: 'EMPLOYEE',
@@ -21,7 +22,22 @@ export const PERMISSIONS = {
     TENANT_SETTINGS: 'tenant_settings',
 } as const;
 
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<string, readonly string[]> = {
+    OWNER: [
+        PERMISSIONS.VIEW_PROJECTS,
+        PERMISSIONS.CREATE_PROJECT,
+        PERMISSIONS.EDIT_PROJECT,
+        PERMISSIONS.DELETE_PROJECT,
+        PERMISSIONS.CREATE_TASK,
+        PERMISSIONS.EDIT_TASK,
+        PERMISSIONS.DELETE_TASK,
+        PERMISSIONS.ASSIGN_TASK,
+        PERMISSIONS.MANAGE_USERS,
+        PERMISSIONS.INVITE_USER,
+        PERMISSIONS.UPDATE_USER_ROLE,
+        PERMISSIONS.DELETE_USER,
+        PERMISSIONS.TENANT_SETTINGS,
+    ],
     ADMIN: [
         PERMISSIONS.VIEW_PROJECTS,
         PERMISSIONS.CREATE_PROJECT,
@@ -52,7 +68,7 @@ export const ROLE_PERMISSIONS = {
     USER: [
         PERMISSIONS.VIEW_PROJECTS,
     ],
-} as const;
+};
 
 const PERMISSION_TO_AUTHORITY: Record<string, string> = {
     [PERMISSIONS.VIEW_PROJECTS]: 'PROJECT_READ',
@@ -71,6 +87,7 @@ const PERMISSION_TO_AUTHORITY: Record<string, string> = {
 };
 
 export const ROLE_LABELS: Record<string, string> = {
+    OWNER: 'OWNER',
     ORG_ADMIN: 'ADMIN',
     ADMIN: 'ADMIN',
     MANAGER: 'MANAGER',
@@ -88,8 +105,16 @@ export const normalizeRole = (role?: string | null) => {
     return ROLE_LABELS[role] ?? role;
 };
 
+export const isAdminRole = (role?: string | null): boolean => {
+    const normalized = normalizeRole(role);
+    return normalized === ROLES.OWNER || normalized === ROLES.ADMIN;
+};
+
 export const toBackendRole = (role: string) => {
     const normalized = normalizeRole(role);
+    if (normalized === ROLES.OWNER) {
+        return 'OWNER';
+    }
     if (normalized === ROLES.ADMIN) {
         return 'ORG_ADMIN';
     }

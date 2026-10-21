@@ -35,7 +35,6 @@ import java.util.Map;
 @Slf4j
 @Component
 @Profile("benchmark")
-@SuppressWarnings("null")
 public class BenchmarkDataSeeder implements CommandLineRunner {
 
     static final int NUM_TENANTS         = 50;

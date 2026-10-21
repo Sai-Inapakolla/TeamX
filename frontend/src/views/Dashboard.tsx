@@ -262,10 +262,6 @@ const Dashboard: React.FC = () => {
         navigate('/projects');
     };
 
-    const handleAskAi = () => {
-        setAiOpen(true);
-    };
-
     const handleNotificationClick = (projectId?: DashboardNotification['projectId']) => {
         setNotificationsOpen(false);
         if (projectId != null) {

@@ -29,7 +29,6 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class UserManagementService {
 
     private final UserRepository userRepository;
