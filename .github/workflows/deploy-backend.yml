@@ -32,17 +32,15 @@ jobs:
         working-directory: backend
         run: mvn clean package -DskipTests
 
-      - name: Upload JAR artifact
+      - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: teamx-backend
           path: backend/target/*.jar
-          if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
     environment: AZURE_CLIENT_ID
 
     permissions:
@@ -50,22 +48,22 @@ jobs:
       contents: read
 
     steps:
-      - name: Download JAR artifact
+      - name: Download JAR
         uses: actions/download-artifact@v4
         with:
           name: teamx-backend
           path: ./deploy
 
-      - name: Login to Azure using OIDC
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: Teamx-Backend
           slot-name: Production
-          package: ./deploy/*.jar
+          package: ./deploy
