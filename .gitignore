@@ -8,6 +8,11 @@
 *.iml
 .DS_Store
 Thumbs.db
+.project
+.classpath
+**/.classpath
+.settings/
+**/.settings/
 
 # Build Artifacts
 target/
@@ -15,6 +20,7 @@ build/
 dist/
 .gradle/
 *.class
+*.exe
 
 # Node
 node_modules/
@@ -38,6 +44,8 @@ build/
 .env
 .env.*
 *.env
+!.env.example
+!**/.env.example
 sendgrid.env
 backend/sendgrid.env
 backend/.env
@@ -48,47 +56,32 @@ data/
 *.db
 
 # Next.js & Build Artifacts
-.next/
 frontend/.next/
+.next/
+frontend/out/
+out/
+.turbo/
 *.tsbuildinfo
-build/
-dist/
-target/
-.gradle/
-*.class
 
-# Logs
-logs/
+# OS Files
 *.log
-error_log.txt
-startup_error.txt
+logs/
+*.pid
+*.seed
+*.pid.lock
 
-# IDE & Editors
-.idea/
-.vscode/
-.classpath
-.project
-.settings/
-*.swp
-*.swo
-*.iml
-.DS_Store
-Thumbs.db
+# Misc
+.cache/
+tmp/
+*.bak
+*.orig
+*.tmp
 
-# Python
-venv/
-env/
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
 
-# Maven & Docker
-.m2/
-docker-compose.override.yml
-*.jar.original
-direct-deps.txt
-effective-pom
-# Executables & Binaries
-*.exe
-benchmarks/k6.exe
+# Generated lock files (optional - adjust as needed)
+# package-lock.json
+# yarn.lock

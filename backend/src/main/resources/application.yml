@@ -2,26 +2,22 @@ spring:
   application:
     name: saas-platform
 
-  # --- Database Connection (Azure SQL / MySQL / H2 Fallback) ---
+  # --- Database Connection (Azure SQL Server) ---
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/saas_platform;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1;MODE=MySQL}
-    username: ${SPRING_DATASOURCE_USERNAME:sa}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:com.microsoft.sqlserver.jdbc.SQLServerDriver}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
       idle-timeout: 300000
       connection-timeout: 20000
-
-  h2:
-    console:
-      enabled: ${H2_CONSOLE_ENABLED:false}
-      path: /h2-console
+      max-lifetime: 1200000
 
   jpa:
     hibernate:
-      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+      ddl-auto: ${HIBERNATE_DDL_AUTO:none}
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     defer-datasource-initialization: false
     properties:

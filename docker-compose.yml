@@ -1,27 +1,18 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: _
-      MYSQL_DATABASE: _
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   backend:
     build: ./backend
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: _
-      SPRING_DATASOURCE_USERNAME: _
-      SPRING_DATASOURCE_PASSWORD: _
-      JWT_SECRET: _
-    depends_on:
-      - mysql
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.SQLServerDialect
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
 
   frontend:
     build: ./frontend
@@ -31,7 +22,3 @@ services:
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
     depends_on:
       - backend
-
-volumes:
-  mysql_data:
-
